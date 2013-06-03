@@ -16,7 +16,6 @@ typedef int TVec;
 #define TVEC_DEFAULT_SIZE    128
 #define TVEC_DEFAULT_STEP    64
 
-
 #define TVEC_NEW(V, sz)                                                 \
     do {                                                                \
         const int s = (sz) > TVEC_DEFAULT_SIZE ? (sz) : TVEC_DEFAULT_SIZE; \
@@ -28,23 +27,17 @@ typedef int TVec;
         (V)[TVEC_HEADER_ALLOC_I] = s;                                   \
     } while (0)
 
-
 #define TVEC_FREE(V)                            \
     do {                                        \
         free(V);                                \
         V = NULL;                               \
     } while (0)
 
-
-#define TVEC_DATAPTR(V) ((V) + TVEC_HEADER_SIZE)
-
-#define TVEC_SIZE(V) ((V)[TVEC_HEADER_SIZE_I])
-
-#define TVEC_ALLOC(V) ((V)[TVEC_HEADER_ALLOC_I])
-
-#define TVEC_AT(V, i) ((V)[TVEC_HEADER_SIZE + (i)])
-
-#define TVEC_CLEAR(V) ((V)[TVEC_HEADER_SIZE_I] = 0)
+#define TVEC_DATAPTR(V)  ((V) + TVEC_HEADER_SIZE)
+#define TVEC_SIZE(V)     ((V)[TVEC_HEADER_SIZE_I])
+#define TVEC_ALLOC(V)    ((V)[TVEC_HEADER_ALLOC_I])
+#define TVEC_AT(V, i)    ((V)[TVEC_HEADER_SIZE + (i)])
+#define TVEC_CLEAR(V)    ((V)[TVEC_HEADER_SIZE_I] = 0)
 
 #define TVEC_RESIZE(V, nsz)                                             \
     do {                                                                \
@@ -61,20 +54,20 @@ typedef int TVec;
     } while(0)
 
 
-#define TVEC_APPEND(V, val)                                     \
-    do {                                                        \
-        if ( TVEC_SIZE(V) >= TVEC_ALLOC(V) ) {                  \
-            TVEC_RESIZE(V, TVEC_SIZE(V) + TVEC_DEFAULT_STEP);   \
-        }                                                       \
-        TVEC_AT(V, TVEC_SIZE(V)) = (val);                       \
-        TVEC_SIZE(V) += 1;                                      \
-    } while (0)
+#define TVEC_APPEND(V, val)                                         \
+        do {                                                        \
+            if ( TVEC_SIZE(V) >= TVEC_ALLOC(V) ) {                  \
+                TVEC_RESIZE(V, TVEC_SIZE(V) + TVEC_DEFAULT_STEP);   \
+            }                                                       \
+            TVEC_AT(V, TVEC_SIZE(V)) = (val);                       \
+            TVEC_SIZE(V) += 1;                                      \
+        } while (0)
 
 #define TVEC_DELETE(V, idx)                                             \
-    do {                                                                \
-        memmove(TVEC_DATAPTR(V) + (idx), TVEC_DATAPTR(V) + (idx) + 1, sizeof(TVec) * (TVEC_SIZE(V) - idx - 1)); \
-        TVEC_SIZE(V) -= 1;                                              \
-    } while(0)
+        do {                                                            \
+            memmove(TVEC_DATAPTR(V) + (idx), TVEC_DATAPTR(V) + (idx) + 1, sizeof(TVec) * (TVEC_SIZE(V) - idx - 1)); \
+            TVEC_SIZE(V) -= 1;                                          \
+        } while(0)
 
 
 /*******inline version of qsort*******/
@@ -103,11 +96,10 @@ typedef int TVec;
  * comparison routine, thus speeding up sorting a lot.
  *
  * Usage:
- *  #include "iqsort.h"
  *  #define islt(a,b) (strcmp((*a),(*b))<0)
  *  char *arr[];
  *  int n;
- *  QSORT(char*, arr, n, islt);
+ *  _QSORT(char*, arr, n, islt);
  *
  * The "prototype" and 4 arguments are:
  *  QSORT(TYPE,BASE,NELT,ISLT)
@@ -124,7 +116,7 @@ typedef int TVec;
  * another, no other conditions (greather than, equal to etc) are tested.
  * So, for example, to define integer sort, use:
  *  #define islt(a,b) ((*a)<(*b))
- *  QSORT(int, arr, n, islt)
+ *  _QSORT(int, arr, n, islt)
  *
  * The macro could be used to implement a sorting function (see examples
  * below), or to implement the sorting algorithm inline.  That is, either
@@ -148,7 +140,7 @@ typedef int TVec;
  * Sorting array of string pointers:
  * void str_qsort(char *arr[], unsigned n) {
  * #define str_lt(a,b) (strcmp((*a),(*b)) < 0)
- *   QSORT(char*, arr, n, str_lt);
+ *   _QSORT(char*, arr, n, str_lt);
  * }
  *
  * Sorting array of structures:
@@ -159,7 +151,7 @@ typedef int TVec;
  * };
  * void elt_qsort(struct elt *arr, unsigned n) {
  * #define elt_lt(a,b) ((a)->key < (b)->key)
- *  QSORT(struct elt, arr, n, elt_lt);
+ *  _QSORT(struct elt, arr, n, elt_lt);
  * }
  *
  * And so on.
@@ -184,13 +176,15 @@ typedef int TVec;
    log(MAX_THRESH)).  Since total_elements has type unsigned, we get as
    upper bound for log (total_elements):
    bits per byte (CHAR_BIT) * sizeof(unsigned).  */
-#define _QSORT_STACK_SIZE	(8 * sizeof(unsigned))
+#define _QSORT_STACK_SIZE   (8 * sizeof(unsigned))
+
 #define _QSORT_PUSH(top, low, high)                     \
     (((top->_lo = (low)), (top->_hi = (high)), ++top))
-#define	_QSORT_POP(low, high, top)                  \
-    ((--top, (low = top->_lo), (high = top->_hi)))
-#define	_QSORT_STACK_NOT_EMPTY	(_stack < _top)
 
+#define _QSORT_POP(low, high, top)                      \
+        ((--top, (low = top->_lo), (high = top->_hi)))
+
+#define _QSORT_STACK_NOT_EMPTY  (_stack < _top)
 
 /* Order size using quicksort.  This implementation incorporates
    four optimizations discussed in Sedgewick:
@@ -218,152 +212,151 @@ typedef int TVec;
 
 /* The main code starts here... */
 #define _QSORT(QSORT_TYPE,QSORT_BASE,QSORT_NELT,QSORT_LT)               \
-    {                                                                   \
-        QSORT_TYPE *const _base = (QSORT_BASE);                         \
-        const unsigned _elems = (QSORT_NELT);                           \
-        QSORT_TYPE _hold;                                               \
+        {                                                               \
+            QSORT_TYPE *const _base = (QSORT_BASE);                     \
+            const unsigned _elems = (QSORT_NELT);                       \
+            QSORT_TYPE _hold;                                           \
                                                                         \
-        /* Don't declare two variables of type QSORT_TYPE in a single   \
-         * statement: eg `TYPE a, b;', in case if TYPE is a pointer,    \
-         * expands to `type* a, b;' wich isn't what we want.            \
-         */                                                             \
+            /* Don't declare two variables of type QSORT_TYPE in a single \
+             * statement: eg `TYPE a, b;', in case if TYPE is a pointer, \
+             * expands to `type* a, b;' wich isn't what we want.        \
+             */                                                         \
                                                                         \
-        if (_elems > _QSORT_MAX_THRESH) {                               \
-            QSORT_TYPE *_lo = _base;                                    \
-            QSORT_TYPE *_hi = _lo + _elems - 1;                         \
-            struct {                                                    \
-                QSORT_TYPE *_hi; QSORT_TYPE *_lo;                       \
-            } _stack[_QSORT_STACK_SIZE], *_top = _stack + 1;            \
+            if (_elems > _QSORT_MAX_THRESH) {                           \
+                QSORT_TYPE *_lo = _base;                                \
+                QSORT_TYPE *_hi = _lo + _elems - 1;                     \
+                struct {                                                \
+                    QSORT_TYPE *_hi; QSORT_TYPE *_lo;                   \
+                } _stack[_QSORT_STACK_SIZE], *_top = _stack + 1;        \
                                                                         \
-            while (_QSORT_STACK_NOT_EMPTY) {                            \
-                QSORT_TYPE *_left_ptr; QSORT_TYPE *_right_ptr;			\
+                while (_QSORT_STACK_NOT_EMPTY) {                        \
+                    QSORT_TYPE *_left_ptr; QSORT_TYPE *_right_ptr;      \
                                                                         \
-                /* Select median value from among LO, MID, and HI. Rearrange \
-                   LO and HI so the three values are sorted. This lowers the \
-                   probability of picking a pathological pivot value and \
-                   skips a comparison for both the LEFT_PTR and RIGHT_PTR in \
-                   the while loops. */                                  \
+                    /* Select median value from among LO, MID, and HI. Rearrange \
+                       LO and HI so the three values are sorted. This lowers the \
+                       probability of picking a pathological pivot value and \
+                       skips a comparison for both the LEFT_PTR and RIGHT_PTR in \
+                       the while loops. */                              \
                                                                         \
-                QSORT_TYPE *_mid = _lo + ((_hi - _lo) >> 1);            \
+                    QSORT_TYPE *_mid = _lo + ((_hi - _lo) >> 1);        \
                                                                         \
-                if (QSORT_LT (_mid, _lo))                               \
-                    _QSORT_SWAP (_mid, _lo, _hold);                     \
-                if (QSORT_LT (_hi, _mid))	{                           \
-                    _QSORT_SWAP (_mid, _hi, _hold);                     \
                     if (QSORT_LT (_mid, _lo))                           \
                         _QSORT_SWAP (_mid, _lo, _hold);                 \
-                }                                                       \
-                                                                        \
-                _left_ptr  = _lo + 1;                                   \
-                _right_ptr = _hi - 1;                                   \
-                                                                        \
-                /* Here's the famous ``collapse the walls'' section of quicksort. \
-                   Gotta like those tight inner loops!  They are the main reason \
-                   that this algorithm runs much faster than others. */ \
-                do {                                                    \
-                    while (QSORT_LT (_left_ptr, _mid))                  \
-                        ++_left_ptr;                                    \
-                                                                        \
-                    while (QSORT_LT (_mid, _right_ptr))                 \
-                        --_right_ptr;                                   \
-                                                                        \
-                    if (_left_ptr < _right_ptr) {                       \
-                        _QSORT_SWAP (_left_ptr, _right_ptr, _hold);     \
-                        if (_mid == _left_ptr)                          \
-                            _mid = _right_ptr;                          \
-                        else if (_mid == _right_ptr)                    \
-                            _mid = _left_ptr;                           \
-                        ++_left_ptr;                                    \
-                        --_right_ptr;                                   \
+                    if (QSORT_LT (_hi, _mid))   {                       \
+                        _QSORT_SWAP (_mid, _hi, _hold);                 \
+                        if (QSORT_LT (_mid, _lo))                       \
+                            _QSORT_SWAP (_mid, _lo, _hold);             \
                     }                                                   \
-                    else if (_left_ptr == _right_ptr) {                 \
-                        ++_left_ptr;                                    \
-                        --_right_ptr;                                   \
-                        break;                                          \
+                                                                        \
+                    _left_ptr  = _lo + 1;                               \
+                    _right_ptr = _hi - 1;                               \
+                                                                        \
+                    /* Here's the famous ``collapse the walls'' section of quicksort. \
+                       Gotta like those tight inner loops!  They are the main reason \
+                       that this algorithm runs much faster than others. */ \
+                    do {                                                \
+                        while (QSORT_LT (_left_ptr, _mid))              \
+                            ++_left_ptr;                                \
+                                                                        \
+                        while (QSORT_LT (_mid, _right_ptr))             \
+                            --_right_ptr;                               \
+                                                                        \
+                        if (_left_ptr < _right_ptr) {                   \
+                            _QSORT_SWAP (_left_ptr, _right_ptr, _hold); \
+                            if (_mid == _left_ptr)                      \
+                                _mid = _right_ptr;                      \
+                            else if (_mid == _right_ptr)                \
+                                _mid = _left_ptr;                       \
+                            ++_left_ptr;                                \
+                            --_right_ptr;                               \
+                        }                                               \
+                        else if (_left_ptr == _right_ptr) {             \
+                            ++_left_ptr;                                \
+                            --_right_ptr;                               \
+                            break;                                      \
+                        }                                               \
+                    } while (_left_ptr <= _right_ptr);                  \
+                                                                        \
+                    /* Set up pointers for next iteration.  First determine whether \
+                       left and right partitions are below the threshold size.  If so, \
+                       ignore one or both.  Otherwise, push the larger partition's \
+                       bounds on the stack and continue sorting the smaller one. */ \
+                                                                        \
+                    if (_right_ptr - _lo <= _QSORT_MAX_THRESH) {        \
+                        if (_hi - _left_ptr <= _QSORT_MAX_THRESH)       \
+                            /* Ignore both small partitions. */         \
+                            _QSORT_POP (_lo, _hi, _top);                \
+                        else                                            \
+                            /* Ignore small left partition. */          \
+                            _lo = _left_ptr;                            \
                     }                                                   \
-                } while (_left_ptr <= _right_ptr);                      \
-                                                                        \
-                /* Set up pointers for next iteration.  First determine whether \
-                   left and right partitions are below the threshold size.  If so, \
-                   ignore one or both.  Otherwise, push the larger partition's \
-                   bounds on the stack and continue sorting the smaller one. */ \
-                                                                        \
-                if (_right_ptr - _lo <= _QSORT_MAX_THRESH) {            \
-                    if (_hi - _left_ptr <= _QSORT_MAX_THRESH)			\
-                        /* Ignore both small partitions. */				\
-                        _QSORT_POP (_lo, _hi, _top);                    \
-                    else                                                \
-                        /* Ignore small left partition. */				\
+                    else if (_hi - _left_ptr <= _QSORT_MAX_THRESH)      \
+                        /* Ignore small right partition. */             \
+                        _hi = _right_ptr;                               \
+                    else if (_right_ptr - _lo > _hi - _left_ptr) {      \
+                        /* Push larger left partition indices. */       \
+                        _QSORT_PUSH (_top, _lo, _right_ptr);            \
                         _lo = _left_ptr;                                \
-                }                                                       \
-                else if (_hi - _left_ptr <= _QSORT_MAX_THRESH)			\
-                    /* Ignore small right partition. */                 \
-                    _hi = _right_ptr;                                   \
-                else if (_right_ptr - _lo > _hi - _left_ptr) {			\
-                    /* Push larger left partition indices. */			\
-                    _QSORT_PUSH (_top, _lo, _right_ptr);                \
-                    _lo = _left_ptr;                                    \
-                }                                                       \
-                else {                                                  \
-                    /* Push larger right partition indices. */			\
-                    _QSORT_PUSH (_top, _left_ptr, _hi);                 \
-                    _hi = _right_ptr;                                   \
-                }                                                       \
-            }                                                           \
-        }                                                               \
-                                                                        \
-        /* Once the BASE array is partially sorted by quicksort the rest \
-           is completely sorted using insertion sort, since this is efficient \
-           for partitions below MAX_THRESH size. BASE points to the		\
-           beginning of the array to sort, and END_PTR points at the very \
-           last element in the array (*not* one beyond it!). */         \
-                                                                        \
-        {                                                               \
-            QSORT_TYPE *const _end_ptr = _base + _elems - 1;            \
-            QSORT_TYPE *_tmp_ptr = _base;                               \
-            register QSORT_TYPE *_run_ptr;                              \
-            QSORT_TYPE *_thresh;                                        \
-                                                                        \
-            _thresh = _base + _QSORT_MAX_THRESH;                        \
-            if (_thresh > _end_ptr)                                     \
-                _thresh = _end_ptr;                                     \
-                                                                        \
-            /* Find smallest element in first threshold and place it at the \
-               array's beginning.  This is the smallest array element,  \
-               and the operation speeds up insertion sort's inner loop. */ \
-                                                                        \
-            for (_run_ptr = _tmp_ptr + 1; _run_ptr <= _thresh; ++_run_ptr) \
-                if (QSORT_LT (_run_ptr, _tmp_ptr))                      \
-                    _tmp_ptr = _run_ptr;                                \
-                                                                        \
-            if (_tmp_ptr != _base)                                      \
-                _QSORT_SWAP (_tmp_ptr, _base, _hold);                   \
-                                                                        \
-            /* Insertion sort, running from left-hand-side              \
-             * up to right-hand-side.  */                               \
-                                                                        \
-            _run_ptr = _base + 1;                                       \
-            while (++_run_ptr <= _end_ptr) {                            \
-                _tmp_ptr = _run_ptr - 1;                                \
-                while (QSORT_LT (_run_ptr, _tmp_ptr))                   \
-                    --_tmp_ptr;                                         \
-                                                                        \
-                ++_tmp_ptr;                                             \
-                if (_tmp_ptr != _run_ptr) {                             \
-                    QSORT_TYPE *_trav = _run_ptr + 1;                   \
-                    while (--_trav >= _run_ptr) {                       \
-                        QSORT_TYPE *_hi; QSORT_TYPE *_lo;				\
-                        _hold = *_trav;                                 \
-                                                                        \
-                        for (_hi = _lo = _trav; --_lo >= _tmp_ptr; _hi = _lo) \
-                            *_hi = *_lo;                                \
-                        *_hi = _hold;                                   \
+                    }                                                   \
+                    else {                                              \
+                        /* Push larger right partition indices. */      \
+                        _QSORT_PUSH (_top, _left_ptr, _hi);             \
+                        _hi = _right_ptr;                               \
                     }                                                   \
                 }                                                       \
             }                                                           \
-        }                                                               \
                                                                         \
-    }
+            /* Once the BASE array is partially sorted by quicksort the rest \
+               is completely sorted using insertion sort, since this is efficient \
+               for partitions below MAX_THRESH size. BASE points to the \
+               beginning of the array to sort, and END_PTR points at the very \
+               last element in the array (*not* one beyond it!). */     \
+                                                                        \
+            {                                                           \
+                QSORT_TYPE *const _end_ptr = _base + _elems - 1;        \
+                QSORT_TYPE *_tmp_ptr = _base;                           \
+                register QSORT_TYPE *_run_ptr;                          \
+                QSORT_TYPE *_thresh;                                    \
+                                                                        \
+                _thresh = _base + _QSORT_MAX_THRESH;                    \
+                if (_thresh > _end_ptr)                                 \
+                    _thresh = _end_ptr;                                 \
+                                                                        \
+                /* Find smallest element in first threshold and place it at the \
+                   array's beginning.  This is the smallest array element, \
+                   and the operation speeds up insertion sort's inner loop. */ \
+                                                                        \
+                for (_run_ptr = _tmp_ptr + 1; _run_ptr <= _thresh; ++_run_ptr) \
+                    if (QSORT_LT (_run_ptr, _tmp_ptr))                  \
+                        _tmp_ptr = _run_ptr;                            \
+                                                                        \
+                if (_tmp_ptr != _base)                                  \
+                    _QSORT_SWAP (_tmp_ptr, _base, _hold);               \
+                                                                        \
+                /* Insertion sort, running from left-hand-side          \
+                 * up to right-hand-side.  */                           \
+                                                                        \
+                _run_ptr = _base + 1;                                   \
+                while (++_run_ptr <= _end_ptr) {                        \
+                    _tmp_ptr = _run_ptr - 1;                            \
+                    while (QSORT_LT (_run_ptr, _tmp_ptr))               \
+                        --_tmp_ptr;                                     \
+                                                                        \
+                    ++_tmp_ptr;                                         \
+                    if (_tmp_ptr != _run_ptr) {                         \
+                        QSORT_TYPE *_trav = _run_ptr + 1;               \
+                        while (--_trav >= _run_ptr) {                   \
+                            QSORT_TYPE *_hi; QSORT_TYPE *_lo;           \
+                            _hold = *_trav;                             \
+                                                                        \
+                            for (_hi = _lo = _trav; --_lo >= _tmp_ptr; _hi = _lo) \
+                                *_hi = *_lo;                            \
+                            *_hi = _hold;                               \
+                        }                                               \
+                    }                                                   \
+                }                                                       \
+            }                                                           \
+        }
 
 
 #define TVEC_SORT(V, CMP)                       \
