@@ -1,6 +1,5 @@
 TVec
 
-
 A Simple inline dynamic array implementation in C.
 
 ```c
@@ -22,3 +21,4 @@ TVEC_SORT(pt, CMP); /* sort by desendent order */
 TVEC_FREE(pt); /* free the memory */
 
 ```
+Note you need to modify the type to your need in TVec.h in line 10.
