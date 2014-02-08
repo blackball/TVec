@@ -1,4 +1,4 @@
-#include "TVec.H"
+#include "TVec.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,6 +32,7 @@ Test() {
     PRINT_V(V);
 
 #define CMP(a,b) ((*a) > (*b))
+
     TVEC_SORT(V, CMP);
 
     PRINT_V(V);
